@@ -1,8 +1,22 @@
 #include "tetris_game.h"
 
+#include <Keypad.h>
+
 unsigned long cas_predtim = millis();
-Casovac casovac_akt = Casovac(1000);
-byte counter = 0;
+Casovac casovac_hra(1000);
+Casovac casovac_vstup(150);
+char aktivniKlavesa = NO_KEY;
+
+char klavesy[4][4] = {
+  {'1','2','3','A'},
+  {'4','5','6','B'},
+  {'7','8','9','C'},
+  {'*','0','#','D'}
+};
+byte radky[4] = { 9, 8, 7, 6 };
+byte sloupce[4] = { 5, 4, 3, 2 };
+
+Keypad klavesnice(makeKeymap(klavesy), radky, sloupce, 4, 4);
 
 void vygeneruj_blok()
 {
@@ -10,6 +24,15 @@ void vygeneruj_blok()
 	Blok blok(typBloku, Pozice(-2, random(0, MAPA_ROZMER - 1)));
 
 	tetris.nastav_blok(blok);
+}
+void zpracujKlavesu(KeypadEvent klavesa)
+{
+	if (klavesnice.getState() == KeyState::PRESSED || 
+		klavesnice.getState() == KeyState::HOLD)
+	{
+		aktivniKlavesa = klavesa;
+	}
+	else aktivniKlavesa = NO_KEY;
 }
 
 void setup()
@@ -26,6 +49,8 @@ void setup()
 
   vygeneruj_blok();
 
+  klavesnice.addEventListener(zpracujKlavesu);
+
   interrupts();
 }
 
@@ -34,39 +59,39 @@ void loop()
 	unsigned long cas = millis();
 	unsigned long delta = cas - cas_predtim;
 	cas_predtim = cas;
-	casovac_akt.aktualizuj(delta);
+	casovac_hra.aktualizuj(delta);
+	casovac_vstup.aktualizuj(delta);
 
-	if (casovac_akt.reset_pokud_pripraven())
+	if (casovac_hra.reset_pokud_pripraven())
 	{
 		bool usazen_nove = tetris.aktualizuj();
-
 		if (usazen_nove)
 		{
 			vygeneruj_blok();
 		}
 	}
 
-	if (Serial.available() > 0 && !tetris.aktivni_blok.usazen)
+	klavesnice.getKey();
+	if (aktivniKlavesa != NO_KEY && !tetris.aktivni_blok.usazen && casovac_vstup.reset_pokud_pripraven())
 	{
-		char vstup = Serial.read();
 		Blok blok = tetris.aktivni_blok;
 		bool beze_zmeny = false;
 		
-		switch (vstup)
+		switch (aktivniKlavesa)
 		{
-		case 'a':
+		case '4':
 			blok.pozice.y -= 1;
 			break;
-		case 'd':
+		case '6':
 			blok.pozice.y += 1;
 			break;
-		case 's':
+		case '5':
 			blok.pozice.x += 1;
 			break;
-		case 'x':
+		case '1':
 			blok.zarotuj_90(true);
 			break;
-		case 'y':
+		case '2':
 			blok.zarotuj_90(false);
 			break;
 		default:

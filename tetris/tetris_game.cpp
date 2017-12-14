@@ -44,7 +44,7 @@ Pozice Pozice::operator+(const Pozice& jina)
 
 bool Pozice::je_validni()
 {
-	return	this->x >= 0 && this->x < MAPA_ROZMER &&
+	return	/*this->x >= 0 && */this->x < MAPA_ROZMER &&
 		this->y >= 0 && y < MAPA_ROZMER;
 }
 
@@ -168,10 +168,14 @@ bool Tetris::je_blok_validni(Blok blok)
 	for (byte i = 0; i < 4; i++)
 	{
 		Pozice pozice = blok.telo[i] + blok.pozice;
-		if (!pozice.je_validni() || tetris_mapa[pozice.x][pozice.y] != MAPA_PRAZDNE)
+		if (!pozice.je_validni())
 		{
 			return false;
 		}
+    if (pozice.x >= 0 && tetris_mapa[pozice.x][pozice.y] != MAPA_PRAZDNE)
+    {
+      return false;
+    }
 	}
 
 	return true;
