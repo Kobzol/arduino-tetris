@@ -21,8 +21,16 @@ Keypad klavesnice(makeKeymap(klavesy), radky, sloupce, 4, 4);
 void vygeneruj_blok()
 {
 	TypBloku typBloku = (TypBloku) random(0, POCET_TYPU_BLOKU);
-	Blok blok(typBloku, Pozice(-2, random(0, MAPA_ROZMER - 1)));
+	Blok blok(typBloku, Pozice(0, 0));
 
+  int minPozice = 8, maxPozice = 0;
+  for (int i = 0; i < 4; i++)
+  {
+    minPozice = min(minPozice, blok.telo[i].y);
+    maxPozice = max(maxPozice, blok.telo[i].y);
+  }
+
+  blok.pozice = Pozice(-2, random(-minPozice, MAPA_ROZMER - maxPozice));
 	tetris.nastav_blok(blok);
 }
 void zpracujKlavesu(KeypadEvent klavesa)

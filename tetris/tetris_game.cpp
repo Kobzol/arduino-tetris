@@ -80,6 +80,22 @@ Blok::Blok(TypBloku typBloku, Pozice pozice) : pozice(pozice), usazen(false), ty
 			this->telo[3] = Pozice(0, 1);
 		}
 		break;
+  case TypBloku::Klin:
+    {
+      this->telo[0] = Pozice(0, -1);
+      this->telo[1] = Pozice(0, 0);
+      this->telo[2] = Pozice(0, 1);
+      this->telo[3] = Pozice(1, 0);
+    }
+    break;
+  case TypBloku::Es:
+    {
+      this->telo[0] = Pozice(0, -1);
+      this->telo[1] = Pozice(0, 0);
+      this->telo[2] = Pozice(1, 0);
+      this->telo[3] = Pozice(1, 1);
+    }
+    break;
 	default:
 		break;
 	}
@@ -101,6 +117,9 @@ void Blok::zarotuj_90(bool doprava)
 {
 	if (this->typBloku == TypBloku::Kostka) return;
 
+  static int c = 0;
+  Serial.print("Rotuj ");
+  Serial.println(c++);
 	for (byte i = 0; i < 4; i++)
 	{
 		char x = this->telo[i].x;
@@ -206,7 +225,6 @@ void Tetris::konec_hry()
 void Tetris::odstran_radky()
 {
 	char posunuti_zacatek = -1;
-	byte posunuti_pocet = 0;
 	for (char i = MAPA_ROZMER - 1; i >= 0; i--)
 	{
 		bool odstranit = true;
@@ -221,14 +239,15 @@ void Tetris::odstran_radky()
 
 		if (odstranit)
 		{
-			posunuti_pocet++;
 			posunuti_zacatek = i;
+      break;
 		}
 	}
 
-	if (posunuti_pocet > 0)
+	if (posunuti_zacatek != -1)
 	{
-		this->posun_radky(posunuti_zacatek, posunuti_pocet);
+		this->posun_radky(posunuti_zacatek);
+    this->odstran_radky();
 	}
 }
 bool Tetris::posun_blok()
@@ -297,16 +316,20 @@ bool Tetris::posun_blok()
 	}
 	else return false;
 }
-void Tetris::posun_radky(byte zacatek, byte pocet)
+void Tetris::posun_radky(byte zacatek)
 {
-	for (char i = zacatek + 1; i >= 0; i--)
+	for (char i = zacatek - 1; i >= 0; i--)
 	{
 		for (byte j = 0; j < MAPA_ROZMER; j++)
 		{
-			tetris_mapa[i + pocet][j] = tetris_mapa[i][j];
-			tetris_mapa[i][j] = MAPA_PRAZDNE;
+			tetris_mapa[i + 1][j] = tetris_mapa[i][j];
 		}
 	}
+
+  for (byte j = 0; j < MAPA_ROZMER; j++)
+  {
+    tetris_mapa[0][j] = MAPA_PRAZDNE;
+  }
 }
 void Tetris::vykresli_blok()
 {

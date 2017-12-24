@@ -17,9 +17,11 @@ enum class TypBloku
 {
 	Kostka = 0,
 	Cara = 1,
-	El = 2
+	El = 2,
+  Klin = 3,
+  Es = 4
 };
-#define POCET_TYPU_BLOKU (3)
+#define POCET_TYPU_BLOKU (5)
 
 extern byte tetris_mapa[MAPA_ROZMER][MAPA_ROZMER];
 void led_vysvit();
@@ -82,7 +84,7 @@ private:
 	void konec_hry();
 	void odstran_radky();
 	bool posun_blok();
-	void posun_radky(byte zacatek, byte pocet);
+	void posun_radky(byte zacatek);
 	void vykresli_blok();
 };
 
